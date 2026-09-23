@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>ShareSpace</title>
+<title>NoteShare</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -63,10 +63,11 @@ nav a:hover{
   padding:60px 24px;
 }
 
+/* HOME - moved upward */
 .hero{
   max-width:720px;
   margin:0 auto;
-  padding:90px 20px;
+  padding:35px 20px 90px;
   text-align:center;
 }
 
@@ -94,7 +95,7 @@ h1{
 
 .form{
   max-width:440px;
-  margin:45px auto 0;
+  margin:38px auto 0;
   text-align:left;
 }
 
@@ -345,7 +346,7 @@ button{
   }
 
   .hero{
-    padding-top:65px;
+    padding-top:35px;
   }
 
   .page-head{
@@ -382,7 +383,7 @@ button{
 <header>
 
 <a class="logo" href="#home">
-Share<span>Space</span>
+Note<span>Share</span>
 </a>
 
 <nav>
@@ -548,7 +549,7 @@ Loading posts...
 </section>
 
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN -->
 
 <section id="admin" class="page" style="display:none">
 
@@ -593,8 +594,6 @@ Login
 
 </div>
 
-
-<!-- ADMIN DASHBOARD -->
 
 <div id="dashboard" style="display:none">
 
@@ -646,9 +645,7 @@ Log out
 
 <script>
 
-/* =========================
-   SUPABASE CONFIG
-========================= */
+/* SUPABASE */
 
 const SUPABASE_URL =
 "https://nauquyewzrsmasojgiub.supabase.co";
@@ -663,9 +660,7 @@ SUPABASE_KEY
 );
 
 
-/* =========================
-   PAGE NAVIGATION
-========================= */
+/* PAGE NAVIGATION */
 
 function showPage(page){
 
@@ -688,9 +683,7 @@ checkAdmin();
 }
 
 
-/* =========================
-   USERNAME
-========================= */
+/* USERNAME */
 
 async function claimUsername(){
 
@@ -698,683 +691,4 @@ const input =
 document.getElementById("username");
 
 const error =
-document.getElementById("homeError");
-
-let username =
-input.value.trim()
-.replace(/^@+/,"")
-.toLowerCase();
-
-if(!/^[a-z0-9._]{1,30}$/.test(username)){
-
-error.textContent =
-"Please enter a valid Instagram-style username.";
-
-return;
-
-}
-
-error.textContent="Checking...";
-
-try{
-
-const {data,error:dbError} =
-await db.rpc(
-"claim_username",
-{
-p_username:username
-}
-);
-
-if(dbError){
-
-if(
-dbError.message.includes(
-"USERNAME_ALREADY_EXISTS"
-)
-){
-
-error.textContent =
-"@" + username +
-" is already in use.";
-
-}else{
-
-error.textContent =
-"Could not connect to database.";
-
-}
-
-return;
-
-}
-
-const profile =
-Array.isArray(data)
-? data[0]
-: data;
-
-sessionStorage.setItem(
-"ss_username",
-profile.username
-);
-
-sessionStorage.setItem(
-"ss_claim_token",
-profile.claim_token
-);
-
-showPage("write");
-
-document.getElementById(
-"currentUser"
-).textContent =
-"@" + profile.username;
-
-}
-catch(e){
-
-error.textContent =
-"Something went wrong.";
-
-}
-
-}
-
-
-/* =========================
-   COUNTER
-========================= */
-
-document
-.getElementById("message")
-.addEventListener(
-"input",
-function(){
-
-document.getElementById(
-"counter"
-).textContent =
-this.value.length +
-" / 2000";
-
-}
-);
-
-
-/* =========================
-   PUBLISH
-========================= */
-
-async function publishPost(){
-
-const text =
-document.getElementById(
-"message"
-).value.trim();
-
-const error =
-document.getElementById(
-"writeError"
-);
-
-const token =
-sessionStorage.getItem(
-"ss_claim_token"
-);
-
-if(!text){
-
-error.textContent =
-"Please write something.";
-
-return;
-
-}
-
-if(!token){
-
-error.textContent =
-"Your session expired. Please enter your ID again.";
-
-return;
-
-}
-
-error.textContent="Publishing...";
-
-const {data,error:dbError} =
-await db.rpc(
-"publish_post",
-{
-p_claim_token:token,
-p_content:text
-}
-);
-
-if(dbError){
-
-error.textContent =
-"Could not publish your post.";
-
-return;
-
-}
-
-sessionStorage.removeItem(
-"ss_claim_token"
-);
-
-sessionStorage.removeItem(
-"ss_username"
-);
-
-document.getElementById(
-"message"
-).value="";
-
-showPage("posts");
-
-}
-
-
-/* =========================
-   PUBLIC POSTS
-========================= */
-
-async function loadPosts(){
-
-const feed =
-document.getElementById(
-"feed"
-);
-
-feed.innerHTML =
-'<div class="empty">Loading...</div>';
-
-const {data,error} =
-await db
-.from("posts")
-.select(
-"id,content,created_at,profiles(username)"
-)
-.eq("hidden",false)
-.order(
-"created_at",
-{ascending:false}
-);
-
-if(error){
-
-feed.innerHTML =
-'<div class="empty">Could not load posts.</div>';
-
-return;
-
-}
-
-if(!data.length){
-
-feed.innerHTML =
-'<div class="empty">No posts yet. Be the first to share something.</div>';
-
-return;
-
-}
-
-feed.innerHTML =
-data.map(post => {
-
-const username =
-escapeHTML(
-post.profiles.username
-);
-
-const content =
-escapeHTML(
-post.content
-).replace(
-/\n/g,
-"<br>"
-);
-
-const time =
-new Date(
-post.created_at
-).toLocaleString();
-
-return `
-
-<article class="post">
-
-<div class="post-meta">
-
-<strong>
-@${username}
-</strong>
-
-<time>
-${time}
-</time>
-
-</div>
-
-<div class="post-content">
-${content}
-</div>
-
-</article>
-
-`;
-
-}).join("");
-
-}
-
-
-/* =========================
-   ADMIN LOGIN
-========================= */
-
-async function adminLogin(){
-
-const email =
-document.getElementById(
-"adminEmail"
-).value.trim();
-
-const password =
-document.getElementById(
-"adminPassword"
-).value;
-
-const error =
-document.getElementById(
-"loginError"
-);
-
-error.textContent="Logging in...";
-
-const {data,error:loginError} =
-await db.auth.signInWithPassword({
-email,
-password
-});
-
-if(loginError){
-
-error.textContent =
-loginError.message;
-
-return;
-
-}
-
-const allowed =
-await isAdmin();
-
-if(!allowed){
-
-await db.auth.signOut();
-
-error.textContent =
-"This account is not an admin.";
-
-return;
-
-}
-
-document.getElementById(
-"loginBox"
-).style.display="none";
-
-document.getElementById(
-"dashboard"
-).style.display="block";
-
-loadAdminPosts();
-
-}
-
-
-/* =========================
-   ADMIN CHECK
-========================= */
-
-async function isAdmin(){
-
-const {
-data:{user}
-} =
-await db.auth.getUser();
-
-if(!user){
-
-return false;
-
-}
-
-const {data,error} =
-await db
-.from("admins")
-.select("user_id")
-.eq(
-"user_id",
-user.id
-)
-.maybeSingle();
-
-return !error && !!data;
-
-}
-
-
-async function checkAdmin(){
-
-const allowed =
-await isAdmin();
-
-if(allowed){
-
-document.getElementById(
-"loginBox"
-).style.display="none";
-
-document.getElementById(
-"dashboard"
-).style.display="block";
-
-loadAdminPosts();
-
-}else{
-
-document.getElementById(
-"loginBox"
-).style.display="block";
-
-document.getElementById(
-"dashboard"
-).style.display="none";
-
-}
-
-}
-
-
-/* =========================
-   ADMIN POSTS
-========================= */
-
-async function loadAdminPosts(){
-
-const box =
-document.getElementById(
-"adminFeed"
-);
-
-box.innerHTML =
-'<div class="empty">Loading...</div>';
-
-const {data,error} =
-await db
-.from("posts")
-.select(
-"id,content,created_at,hidden,profiles(username)"
-)
-.order(
-"created_at",
-{ascending:false}
-);
-
-if(error){
-
-box.innerHTML =
-'<div class="empty">Could not load admin posts.</div>';
-
-return;
-
-}
-
-document.getElementById(
-"postCount"
-).textContent =
-data.length;
-
-if(!data.length){
-
-box.innerHTML =
-'<div class="empty">No posts yet.</div>';
-
-return;
-
-}
-
-box.innerHTML =
-data.map(post => {
-
-return `
-
-<article
-class="admin-post ${
-post.hidden ? "hidden" : ""
-}"
->
-
-<div class="admin-row">
-
-<strong>
-@${escapeHTML(
-post.profiles.username
-)}
-</strong>
-
-<time>
-${new Date(
-post.created_at
-).toLocaleString()}
-</time>
-
-</div>
-
-<div class="post-content">
-
-${escapeHTML(
-post.content
-).replace(
-/\n/g,
-"<br>"
-)}
-
-</div>
-
-<div class="actions">
-
-<button
-onclick="togglePost(
-'${post.id}',
-${!post.hidden}
-)"
->
-
-${post.hidden ? "Show" : "Hide"}
-
-</button>
-
-<button
-class="delete"
-onclick="deletePost(
-'${post.id}'
-)"
->
-
-Delete
-
-</button>
-
-</div>
-
-</article>
-
-`;
-
-}).join("");
-
-}
-
-
-/* =========================
-   HIDE / SHOW
-========================= */
-
-async function togglePost(
-id,
-newHidden
-){
-
-const allowed =
-await isAdmin();
-
-if(!allowed){
-
-alert(
-"Admin access required."
-);
-
-return;
-
-}
-
-const {error} =
-await db
-.from("posts")
-.update({
-hidden:newHidden
-})
-.eq(
-"id",
-id
-);
-
-if(error){
-
-alert(
-"Could not update post."
-);
-
-return;
-
-}
-
-loadAdminPosts();
-
-}
-
-
-/* =========================
-   DELETE
-========================= */
-
-async function deletePost(id){
-
-if(
-!confirm(
-"Delete this post permanently?"
-)
-){
-
-return;
-
-}
-
-const allowed =
-await isAdmin();
-
-if(!allowed){
-
-alert(
-"Admin access required."
-);
-
-return;
-
-}
-
-const {error} =
-await db
-.from("posts")
-.delete()
-.eq(
-"id",
-id
-);
-
-if(error){
-
-alert(
-"Could not delete post."
-);
-
-return;
-
-}
-
-loadAdminPosts();
-
-}
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-async function adminLogout(){
-
-await db.auth.signOut();
-
-document.getElementById(
-"dashboard"
-).style.display="none";
-
-document.getElementById(
-"loginBox"
-).style.display="block";
-
-}
-
-
-/* =========================
-   HTML SECURITY
-========================= */
-
-function escapeHTML(value){
-
-return String(value)
-.replace(
-/[&<>"']/g,
-function(char){
-
-return {
-
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#039;"
-
-}[char];
-
-});
-
-}
-
-
-/* =========================
-   START
-========================= */
-
-showPage("home");
-
-</script>
-
-</body>
-</html>
+document.getElementById("home
