@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NoteShare</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#f5f3ee;
+color:#171717;
+font-family:Arial,system-ui,sans-serif
+}
+
+header{
+height:70px;
+padding:0 6%;
+display:flex;
+align-items:center;
+justify-content:space-between;
+border-bottom:1px solid #ddd8cf;
+background:#faf9f5
+}
+
+.logo{
+font-size:23px;
+font-weight:800;
+cursor:pointer
+}
+
+.logo span{font-weight:400}
+
+nav{
+display:flex;
+gap:20px
+}
+
+nav a{
+font-size:14px;
+color:#666;
+cursor:pointer
+}
+
+.page{
+max-width:1050px;
+margin:auto;
+padding:55px 22px
+}
+
+.hero{
+max-width:700px;
+margin:auto;
+text-align:center;
+padding:30px 10px 80px
+}
+
+.eyebrow{
+font-size:11px;
+letter-spacing:2px;
+text-transform:uppercase;
+font-weight:bold;
+color:#8b8175;
+margin-bottom:14px
+}
+
+h1{
+font-size:clamp(44px,7vw,75px);
+line-height:.98;
+letter-spacing:-3px;
+margin:0 0 20px
+}
+
+.hero p{
+font-size:18px;
+line-height:1.6;
+color:#666
+}
+
+.form{
+max-width:430px;
+margin:30px auto;
+text-align:left
+}
+
+label{
+font-size:13px;
+font-weight:bold;
+display:block;
+margin-bottom:8px
+}
+
+.username-box{
+display:flex;
+align-items:center;
+background:white;
+border:1px solid #bbb5aa;
+border-radius:12px;
+height:52px
+}
+
+.username-box span{
+padding-left:15px;
+font-weight:bold;
+color:#777
+}
+
+.username-box input{
+border:0;
+outline:0;
+background:transparent;
+flex:1;
+height:100%;
+font-size:16px;
+padding:0 12px 0 4px
+}
+
+.primary{
+width:100%;
+border:0;
+border-radius:12px;
+padding:14px;
+background:#171717;
+color:white;
+font-weight:bold;
+cursor:pointer;
+margin-top:14px
+}
+
+.secondary{
+border:1px solid #d0cbc2;
+border-radius:10px;
+padding:12px 16px;
+background:white;
+font-weight:bold;
+cursor:pointer
+}
+
+.error{
+color:#a43b31;
+font-size:13px;
+margin-top:10px;
+min-height:20px;
+white-space:pre-wrap;
+word-break:break-word
+}
+
+.card{
+background:white;
+border:1px solid #ddd8cf;
+border-radius:18px;
+padding:25px
+}
+
+.pin-box{
+max-width:430px;
+margin:50px auto;
+text-align:center
+}
+
+.pin-input{
+width:180px;
+text-align:center;
+font-size:28px;
+letter-spacing:8px;
+padding:14px;
+border:1px solid #bbb5aa;
+border-radius:12px;
+outline:none
+}
+
+.buttons{
+display:flex;
+gap:10px;
+margin-top:15px
+}
+
+.buttons button{flex:1}
+
+.user-pill{
+background:white;
+border:1px solid #ddd8cf;
+padding:10px 15px;
+border-radius:30px;
+font-weight:bold;
+font-size:13px
+}
+
+.page-head{
+display:flex;
+justify-content:space-between;
+align-items:end;
+gap:20px;
+margin-bottom:30px
+}
+
+.page-head h1{
+font-size:48px;
+margin-bottom:8px
+}
+
+.page-head p{
+color:#777;
+margin:0
+}
+
+.notepad{
+background:white;
+border:1px solid #d8d3ca;
+border-radius:18px;
+overflow:hidden
+}
+
+.notepad-top,
+.notepad-bottom{
+padding:14px 18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+color:#888;
+font-size:11px
+}
+
+.notepad-top{
+border-bottom:1px solid #eee9e1
+}
+
+.notepad-bottom{
+border-top:1px solid #eee9e1
+}
+
+textarea{
+width:100%;
+min-height:400px;
+resize:vertical;
+border:0;
+outline:0;
+padding:28px;
+font:17px/1.8 Georgia,serif;
+background:
+repeating-linear-gradient(
+to bottom,
+#fff 0,
+#fff 34px,
+#eeeae3 35px
+)
+}
+
+.feed{
+display:grid;
+gap:15px
+}
+
+.post{
+background:white;
+border:1px solid #ddd8cf;
+border-radius:16px;
+padding:22px
+}
+
+.post-meta{
+display:flex;
+justify-content:space-between;
+gap:20px;
+margin-bottom:15px
+}
+
+.post-meta time{
+color:#999;
+font-size:11px
+}
+
+.post-content{
+font:17px/1.7 Georgia,serif;
+overflow-wrap:anywhere
+}
+
+.empty{
+padding:45px;
+text-align:center;
+border:1px dashed #bbb4a9;
+border-radius:16px;
+color:#888
+}
+
+.my-note{
+background:white;
+border:1px solid #ddd8cf;
+border-radius:15px;
+padding:20px;
+margin-bottom:12px
+}
+
+.my-note-date{
+font-size:11px;
+color:#999;
+margin-bottom:10px
+}
+
+.admin-post{
+background:white;
+border:1px solid #ddd8cf;
+border-radius:15px;
+padding:20px;
+margin-bottom:14px
+}
+
+.admin-actions{
+display:flex;
+gap:8px;
+margin-top:15px
+}
+
+.admin-actions button{
+padding:9px 13px;
+border-radius:9px;
+border:1px solid #d0cbc2;
+background:#f7f5f0;
+cursor:pointer
+}
+
+.delete{color:#a43b31}
+
+@media(max-width:650px){
+header{padding:0 18px}
+nav{gap:10px}
+.page-head{
+flex-direction:column;
+align-items:flex-start
+}
+.page-head h1{font-size:40px}
+.notepad-bottom{
+flex-direction:column;
+align-items:stretch;
+gap:10px
+}
+.buttons{flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo" onclick="showPage('home')">
+Note<span>Share</span>
+</div>
+
+<nav>
+<a onclick="showPage('home')">Home</a>
+<a onclick="showPage('posts')">Posts</a>
+<a onclick="showPage('admin')">Admin</a>
+</nav>
+</header>
+
+
+<!-- HOME -->
+<section id="home" class="page">
+
+<div class="hero">
+
+<div class="eyebrow">A little space for your thoughts</div>
+
+<h1>Share what's on your mind.</h1>
+
+<p>
+Yahan aap apne thoughts, ideas ya messages share kar sakte hain.
+</p>
+
+<div class="form">
+
+<label>Instagram ID</label>
+
+<div class="username-box">
+<span>@</span>
+
+<input
+id="username"
+placeholder="yourusername"
+maxlength="30"
+autocomplete="off"
+inputmode="text"
+enterkeyhint="go"
+oninput="formatUsername(this)"
+onkeydown="usernameEnter(event)"
+>
+</div>
+
+<small>
+Your Instagram ID is used as your NoteShare identity.
+</small>
+
+<button class="primary" onclick="continueUsername()">
+Continue →
+</button>
+
+<div id="homeError" class="error"></div>
+
+</div>
+</div>
+</section>
+
+
+<!-- PIN SETUP -->
+<section id="pin" class="page" style="display:none">
+
+<div class="pin-box card">
+
+<div class="eyebrow">Account safety</div>
+
+<h2>Protect your username</h2>
+
+<p>
+Create a 4-digit PIN so someone else cannot post using your username.
+</p>
+
+<input
+id="newPin"
+class="pin-input"
+type="password"
+inputmode="numeric"
+maxlength="4"
+placeholder="••••"
+>
+
+<div class="buttons">
+
+<button class="primary" onclick="createPin()">
+Create PIN
+</button>
+
+<button class="secondary" onclick="skipPin()">
+Skip
+</button>
+
+</div>
+
+<div id="pinSetupError" class="error"></div>
+
+</div>
+</section>
+
+
+<!-- PIN LOGIN -->
+<section id="pinLogin" class="page" style="display:none">
+
+<div class="pin-box card">
+
+<div class="eyebrow">Protected username</div>
+
+<h2>Enter your PIN</h2>
+
+<p>
+This username is protected by a 4-digit PIN.
+</p>
+
+<input
+id="loginPin"
+class="pin-input"
+type="password"
+inputmode="numeric"
+maxlength="4"
+placeholder="••••"
+onkeydown="pinEnter(event)"
+>
+
+<button class="primary" onclick="loginWithPin()">
+Continue
+</button>
+
+<div id="pinLoginError" class="error"></div>
+
+</div>
+</section>
+
+
+<!-- MY NOTES -->
+<section id="myNotes" class="page" style="display:none">
+
+<div class="page-head">
+
+<div>
+<div class="eyebrow">My notes</div>
+
+<h1>Your notes.</h1>
+
+<p>
+Your notes saved under this NoteShare username.
+</p>
+</div>
+
+<div id="myUser" class="user-pill"></div>
+
+</div>
+
+<button
+class="primary"
+style="width:auto;margin:0 0 25px"
+onclick="showPage('write')"
+>
++ Write New Note
+</button>
+
+<button
+class="secondary"
+style="margin:0 0 25px"
+onclick="logoutNoteShare()"
+>
+Log out
+</button>
+
+<div id="myNotesList"></div>
+
+</section>
+
+
+<!-- WRITE -->
+<section id="write" class="page" style="display:none">
+
+<div class="page-head">
+
+<div>
+<div class="eyebrow">Writing space</div>
+
+<h1>Write something.</h1>
+
+<p>
+Your note will appear on the public wall after publishing.
+</p>
+</div>
+
+<div id="currentUser" class="user-pill"></div>
+
+</div>
+
+<div class="notepad">
+
+<div class="notepad-top">
+<span>NOTE</span>
+<span id="counter">0 / 2000</span>
+</div>
+
+<textarea
+id="message"
+maxlength="2000"
+placeholder="Start writing here..."
+></textarea>
+
+<div class="notepad-bottom">
+
+<span>
+Be respectful. Don't share private information.
+</span>
+
+<button
+class="primary"
+style="width:auto;margin:0"
+onclick="publishNote()"
+>
+Publish ↗
+</button>
+
+</div>
+</div>
+
+<div id="writeError" class="error"></div>
+
+</section>
+
+
+<!-- POSTS -->
+<section id="posts" class="page" style="display:none">
+
+<div class="page-head">
+
+<div>
+<div class="eyebrow">Public wall</div>
+
+<h1>What people shared.</h1>
+
+<p>Latest published notes appear first.</p>
+</div>
+
+<button class="secondary" onclick="showPage('home')">
++ Share yours
+</button>
+
+</div>
+
+<div id="feed" class="feed">
+<div class="empty">Loading...</div>
+</div>
+
+</section>
+
+
+<!-- ADMIN -->
+<section id="admin" class="page" style="display:none">
+
+<div id="adminLogin" class="pin-box card">
+
+<div class="eyebrow">Private area</div>
+
+<h2>Admin Login</h2>
+
+<input
+id="adminEmail"
+type="email"
+placeholder="Admin email"
+style="width:100%;padding:14px;border:1px solid #bbb5aa;border-radius:10px"
+>
+
+<br><br>
+
+<input
+id="adminPassword"
+type="password"
+placeholder="Password"
+style="width:100%;padding:14px;border:1px solid #bbb5aa;border-radius:10px"
+>
+
+<button class="primary" onclick="adminLogin()">
+Login
+</button>
+
+<div id="adminLoginError" class="error"></div>
+
+</div>
+
+
+<div id="adminDashboard" style="display:none">
+
+<div class="page-head">
+
+<div>
+<div class="eyebrow">Admin</div>
+<h1>Manage posts.</h1>
+</div>
+
+<button class="secondary" onclick="adminLogout()">
+Log out
+</button>
+
+</div>
+
+<div id="adminFeed"></div>
+
+</div>
+</section>
+
+
+<script>
+
+/* =========================================================
+SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+"https://nauquyewzrsmasojgiub.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_3ruxY4_epQAn0duF_a7ezw_3tRA3Xiu";
+
+const db =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+/* =========================================================
+STATE
+========================================================= */
+
+let currentUsername =
+sessionStorage.getItem("ns_username");
+
+let currentSession =
+sessionStorage.getItem("ns_session");
+
+
+/* =========================================================
+HELPERS
+========================================================= */
+
+function showPage(page){
+
+document
+.querySelectorAll("body > section")
+.forEach(s=>{
+s.style.display="none";
+});
+
+const target =
+document.getElementById(page);
+
+if(target){
+target.style.display="block";
+}
+
+if(page==="posts"){
+loadPublicPosts();
+}
+
+if(page==="myNotes"){
+loadMyNotes();
+}
+
+if(page==="write"){
+
+if(!currentSession){
+showPage("home");
+return;
+}
+
+document.getElementById("currentUser").textContent =
+"@" + currentUsername;
+}
+
+}
+
+
+function formatUsername(input){
+
+input.value =
+input.value
+.replace(/@/g,"")
+.replace(/[^a-zA-Z0-9._]/g,"")
+.toLowerCase();
+
+}
+
+
+function usernameEnter(event){
+
+if(event.key==="Enter"){
+event.preventDefault();
+continueUsername();
+}
+
+}
+
+
+function pinEnter(event){
+
+if(event.key==="Enter"){
+event.preventDefault();
+loginWithPin();
+}
+
+}
+
+
+function rpcErrorMessage(error){
+
+if(!error){
+return "Unknown database error.";
+}
+
+return [
+error.message || "",
+error.details || "",
+error.hint || ""
+]
+.filter(Boolean)
+.join("\n");
+}
+
+
+/* =========================================================
+CONTINUE USERNAME
+========================================================= */
+
+async function continueUsername(){
+
+const errorBox =
+document.getElementById("homeError");
+
+errorBox.textContent="";
+
+let username =
+document
+.getElementById("username")
+.value
+.trim()
+.replace(/^@+/,"")
+.toLowerCase();
+
+if(!/^[a-z0-9._]{1,30}$/.test(username)){
+
+errorBox.textContent =
+"Please enter a valid Instagram username.";
+
+return;
+}
+
+errorBox.textContent="Checking database...";
+
+
+try{
+
+const response =
+await db.rpc(
+"login_or_create_username",
+{
+p_username:username,
+p_pin:null
+}
+);
+
+if(response.error){
+
+console.error(
+"login_or_create_username:",
+response.error
+);
+
+errorBox.textContent =
+rpcErrorMessage(response.error);
+
+return;
+}
+
+const data=response.data;
+
+const result =
+Array.isArray(data)
+? data[0]
+: data;
+
+if(!result){
+
+errorBox.textContent =
+"Database returned no account result.";
+
+return;
+}
+
+console.log(
+"NoteShare login result:",
+result
+);
+
+
+/* EXISTING PROTECTED ACCOUNT */
+
+if(
+result.status === "pin_required"
+){
+
+sessionStorage.setItem(
+"ns_pending_username",
+username
+);
+
+document.getElementById(
+"loginPin"
+).value="";
+
+showPage("pinLogin");
+
+return;
+}
+
+
+/* NEW ACCOUNT */
+
+if(
+result.status === "created"
+){
+
+sessionStorage.setItem(
+"ns_pending_username",
+username
+);
+
+/*
+IMPORTANT:
+Do not immediately start the session.
+First-time user gets the PIN choice.
+*/
+
+showPage("pin");
+
+return;
+}
+
+
+/* EXISTING WITHOUT PIN */
+
+if(
+result.status === "logged_in"
+){
+
+startSession(
+username,
+result.session_token
+);
+
+return;
+}
+
+
+/* Some SQL versions may return session directly */
+
+if(result.session_token){
+
+startSession(
+username,
+result.session_token
+);
+
+return;
+}
+
+errorBox.textContent =
+"Unexpected database response: " +
+JSON.stringify(result);
+
+}
+catch(err){
+
+console.error(err);
+
+errorBox.textContent =
+"Database error:\n" +
+(err.message || String(err));
+
+}
+
+}
+
+
+/* =========================================================
+CREATE PIN
+========================================================= */
+
+async function createPin(){
+
+const username =
+sessionStorage.getItem(
+"ns_pending_username"
+);
+
+const pin =
+document.getElementById(
+"newPin"
+).value.trim();
+
+const errorBox =
+document.getElementById(
+"pinSetupError"
+);
+
+if(!username){
+
+errorBox.textContent =
+"Username session is missing.";
+
+return;
+}
+
+if(!/^[0-9]{4}$/.test(pin)){
+
+errorBox.textContent =
+"Please enter exactly 4 digits.";
+
+return;
+}
+
+errorBox.textContent =
+"Saving PIN...";
+
+try{
+
+const response =
+await db.rpc(
+"set_username_pin",
+{
+p_username:username,
+p_pin:pin
+}
+);
+
+if(response.error){
+
+console.error(
+"set_username_pin:",
+response.error
+);
+
+errorBox.textContent =
+rpcErrorMessage(response.error);
+
+return;
+}
+
+const result =
+Array.isArray(response.data)
+? response.data[0]
+: response.data;
+
+if(!result){
+
+errorBox.textContent =
+"Database returned no session.";
+
+return;
+}
+
+if(result.session_token){
+
+startSession(
+username,
+result.session_token
+);
+
+return;
+}
+
+errorBox.textContent =
+"PIN was processed but no session was returned.\n" +
+JSON.stringify(result);
+
+}
+catch(err){
+
+console.error(err);
+
+errorBox.textContent =
+err.message || String(err);
+
+}
+
+}
+
+
+/* =========================================================
+SKIP PIN
+========================================================= */
+
+async function skipPin(){
+
+const username =
+sessionStorage.getItem(
+"ns_pending_username"
+);
+
+const errorBox =
+document.getElementById(
+"pinSetupError"
+);
+
+if(!username){
+
+errorBox.textContent =
+"Username session is missing.";
+
+return;
+}
+
+errorBox.textContent =
+"Continuing...";
+
+try{
+
+const response =
+await db.rpc(
+"set_username_pin",
+{
+p_username:username,
+p_pin:null
+}
+);
+
+if(response.error){
+
+console.error(
+"skip PIN:",
+response.error
+);
+
+errorBox.textContent =
+rpcErrorMessage(response.error);
+
+return;
+}
+
+const result =
+Array.isArray(response.data)
+? response.data[0]
+: response.data;
+
+if(result && result.session_token){
+
+startSession(
+username,
+result.session_token
+);
+
+return;
+}
+
+errorBox.textContent =
+"Could not create session.\n" +
+JSON.stringify(result);
+
+}
+catch(err){
+
+console.error(err);
+
+errorBox.textContent =
+err.message || String(err);
+
+}
+
+}
+
+
+/* =========================================================
+PIN LOGIN
+========================================================= */
+
+async function loginWithPin(){
+
+const username =
+sessionStorage.getItem(
+"ns_pending_username"
+);
+
+const pin =
+document.getElementById(
+"loginPin"
+).value.trim();
+
+const errorBox =
+document.getElementById(
+"pinLoginError"
+);
+
+if(!username){
+
+errorBox.textContent =
+"Username session is missing.";
+
+return;
+}
+
+if(!/^[0-9]{4}$/.test(pin)){
+
+errorBox.textContent =
+"Enter your 4-digit PIN.";
+
+return;
+}
+
+errorBox.textContent =
+"Checking PIN...";
+
+try{
+
+const response =
+await db.rpc(
+"login_or_create_username",
+{
+p_username:username,
+p_pin:pin
+}
+);
+
+if(response.error){
+
+console.error(
+"PIN login:",
+response.error
+);
+
+errorBox.textContent =
+rpcErrorMessage(response.error);
+
+return;
+}
+
+const result =
+Array.isArray(response.data)
+? response.data[0]
+: response.data;
+
+if(
+!result ||
+!result.session_token
+){
+
+errorBox.textContent =
+"Login response did not contain a session.\n" +
+JSON.stringify(result);
+
+return;
+}
+
+startSession(
+username,
+result.session_token
+);
+
+}
+catch(err){
+
+console.error(err);
+
+errorBox.textContent =
+err.message || String(err);
+
+}
+
+}
+
+
+/* =========================================================
+START SESSION
+========================================================= */
+
+function startSession(
+username,
+token
+){
+
+if(!token){
+
+alert(
+"Database did not return a session token."
+);
+
+return;
+}
+
+currentUsername=username;
+currentSession=token;
+
+sessionStorage.setItem(
+"ns_username",
+username
+);
+
+sessionStorage.setItem(
+"ns_session",
+token
+);
+
+sessionStorage.removeItem(
+"ns_pending_username"
+);
+
+document.getElementById(
+"currentUser"
+).textContent =
+"@" + username;
+
+document.getElementById(
+"myUser"
+).textContent =
+"@" + username;
+
+showPage("myNotes");
+
+}
+
+
+/* =========================================================
+LOGOUT
+========================================================= */
+
+function logoutNoteShare(){
+
+currentUsername=null;
+currentSession=null;
+
+sessionStorage.removeItem(
+"ns_username"
+);
+
+sessionStorage.removeItem(
+"ns_session"
+);
+
+sessionStorage.removeItem(
+"ns_pending_username"
+);
+
+document.getElementById(
+"username"
+).value="";
+
+showPage("home");
+
+}
+
+
+/* =========================================================
+PUBLISH NOTE
+========================================================= */
+
+async function publishNote(){
+
+const errorBox =
+document.getElementById(
+"writeError"
+);
+
+const content =
+document.getElementById(
+"message"
+).value.trim();
+
+errorBox.textContent="";
+
+if(!currentSession){
+
+errorBox.textContent =
+"Your NoteShare session has expired.";
+
+return;
+}
+
+if(!content){
+
+errorBox.textContent =
+"Please write something.";
+
+return;
+}
+
+errorBox.textContent =
+"Publishing...";
+
+try{
+
+const response =
+await db.rpc(
+"publish_note",
+{
+p_session_token:currentSession,
+p_content:content
+}
+);
+
+if(response.error){
+
+console.error(
+"publish_note:",
+response.error
+);
+
+errorBox.textContent =
+rpcErrorMessage(response.error);
+
+return;
+}
+
+document.getElementById(
+"message"
+).value="";
+
+document.getElementById(
+"counter"
+).textContent="0 / 2000";
+
+showPage("myNotes");
+
+}
+catch(err){
+
+console.error(err);
+
+errorBox.textContent =
+err.message || String(err);
+
+}
+
+}
+
+
+/* =========================================================
+MY NOTES
+========================================================= */
+
+async function loadMyNotes(){
+
+const box =
+document.getElementById(
+"myNotesList"
+);
+
+if(!currentSession){
+
+box.innerHTML =
+'<div class="empty">Please enter your username.</div>';
+
+return;
+}
+
+box.innerHTML =
+'<div class="empty">Loading your notes...</div>';
+
+try{
+
+const response =
+await db.rpc(
+"get_my_notes",
+{
+p_session_token:currentSession
+}
+);
+
+if(response.error){
+
+console.error(
+"get_my_notes:",
+response.error
+);
+
+box.innerHTML =
+'<div class="empty">' +
+escapeHTML(
+rpcErrorMessage(response.error)
+) +
+'</div>';
+
+return;
+}
+
+const data=response.data;
+
+if(!data || !data.length){
+
+box.innerHTML =
+'<div class="empty">You have not published a note yet.</div>';
+
+return;
+}
+
+box.innerHTML =
+data.map(note=>`
+
+<div class="my-note">
+
+<div class="my-note-date">
+${new Date(note.created_at).toLocaleString()}
+</div>
+
+<div class="post-content">
+${escapeHTML(note.content).replace(/\n/g,"<br>")}
+</div>
+
+</div>
+
+`).join("");
+
+}
+catch(err){
+
+console.error(err);
+
+box.innerHTML =
+'<div class="empty">' +
+escapeHTML(err.message || String(err)) +
+'</div>';
+
+}
+
+}
+
+
+/* =========================================================
+PUBLIC POSTS
+========================================================= */
+
+async function loadPublicPosts(){
+
+const feed =
+document.getElementById("feed");
+
+feed.innerHTML =
+'<div class="empty">Loading...</div>';
+
+try{
+
+const response =
+await db
+.from("posts")
+.select(
+"id,content,created_at,hidden,profiles(username)"
+)
+.eq("hidden",false)
+.order(
+"created_at",
+{ascending:false}
+);
+
+if(response.error){
+
+console.error(
+"posts:",
+response.error
+);
+
+feed.innerHTML =
+'<div class="empty">' +
+escapeHTML(
+rpcErrorMessage(response.error)
+) +
+'</div>';
+
+return;
+}
+
+const data=response.data;
+
+if(!data || !data.length){
+
+feed.innerHTML =
+'<div class="empty">No posts yet.</div>';
+
+return;
+}
+
+feed.innerHTML =
+data.map(post=>`
+
+<article class="post">
+
+<div class="post-meta">
+
+<strong>
+@${escapeHTML(
+post.profiles?.username || "user"
+)}
+</strong>
+
+<time>
+${new Date(
+post.created_at
+).toLocaleString()}
+</time>
+
+</div>
+
+<div class="post-content">
+${escapeHTML(post.content).replace(/\n/g,"<br>")}
+</div>
+
+</article>
+
+`).join("");
+
+}
+catch(err){
+
+console.error(err);
+
+feed.innerHTML =
+'<div class="empty">' +
+escapeHTML(err.message || String(err)) +
+'</div>';
+
+}
+
+}
+
+
+/* =========================================================
+COUNTER
+========================================================= */
+
+document
+.getElementById("message")
+.addEventListener(
+"input",
+function(){
+
+document.getElementById(
+"counter"
+).textContent =
+this.value.length +
+" / 2000";
+
+}
+);
+
+
+/* =========================================================
+ADMIN LOGIN
+========================================================= */
+
+async function adminLogin(){
+
+const email =
+document.getElementById(
+"adminEmail"
+).value.trim();
+
+const password =
+document.getElementById(
+"adminPassword"
+).value;
+
+const errorBox =
+document.getElementById(
+"adminLoginError"
+);
+
+errorBox.textContent="";
+
+try{
+
+const response =
+await db.auth.signInWithPassword({
+email,
+password
+});
+
+if(response.error){
+
+errorBox.textContent =
+response.error.message;
+
+return;
+}
+
+const userResponse =
+await db.auth.getUser();
+
+if(userResponse.error){
+
+errorBox.textContent =
+userResponse.error.message;
+
+return;
+}
+
+const user =
+userResponse.data.user;
+
+if(!user){
+
+errorBox.textContent =
+"Login failed.";
+
+return;
+}
+
+const adminResponse =
+await db
+.from("admins")
+.select("user_id")
+.eq("user_id",user.id)
+.maybeSingle();
+
+if(adminResponse.error){
+
+errorBox.textContent =
+rpcErrorMessage(adminResponse.error);
+
+return;
+}
+
+if(!adminResponse.data){
+
+await db.auth.signOut();
+
+errorBox.textContent =
+"This account is not an admin.";
+
+return;
+}
+
+document.getElementById(
+"adminLogin"
+).style.display="none";
+
+document.getElementById(
+"adminDashboard"
+).style.display="block";
+
+loadAdminPosts();
+
+}
+catch(err){
+
+console.error(err);
+
+errorBox.textContent =
+err.message || String(err);
+
+}
+
+}
+
+
+/* =========================================================
+ADMIN POSTS
+========================================================= */
+
+async function loadAdminPosts(){
+
+const box =
+document.getElementById(
+"adminFeed"
+);
+
+box.innerHTML =
+'<div class="empty">Loading...</div>';
+
+try{
+
+const response =
+await db
+.from("posts")
+.select(
+"id,content,created_at,hidden,profiles(username)"
+)
+.order(
+"created_at",
+{ascending:false}
+);
+
+if(response.error){
+
+box.innerHTML =
+'<div class="empty">' +
+escapeHTML(
+rpcErrorMessage(response.error)
+) +
+'</div>';
+
+return;
+}
+
+const data=response.data || [];
+
+if(!data.length){
+
+box.innerHTML =
+'<div class="empty">No posts.</div>';
+
+return;
+}
+
+box.innerHTML =
+data.map(post=>`
+
+<div class="admin-post">
+
+<strong>
+@${escapeHTML(
+post.profiles?.username || "user"
+)}
+</strong>
+
+<div class="my-note-date">
+${new Date(post.created_at).toLocaleString()}
+</div>
+
+<div class="post-content">
+${escapeHTML(post.content).replace(/\n/g,"<br>")}
+</div>
+
+<div class="admin-actions">
+
+<button
+onclick="togglePost(
+'${post.id}',
+${!post.hidden}
+)"
+>
+${post.hidden ? "Show" : "Hide"}
+</button>
+
+<button
+class="delete"
+onclick="deletePost('${post.id}')"
+>
+Delete
+</button>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+catch(err){
+
+console.error(err);
+
+box.innerHTML =
+'<div class="empty">' +
+escapeHTML(err.message || String(err)) +
+'</div>';
+
+}
+
+}
+
+
+/* =========================================================
+ADMIN HIDE / SHOW
+========================================================= */
+
+async function togglePost(id,hidden){
+
+const response =
+await db
+.from("posts")
+.update({hidden})
+.eq("id",id);
+
+if(response.error){
+
+alert(
+rpcErrorMessage(response.error)
+);
+
+return;
+}
+
+loadAdminPosts();
+
+}
+
+
+/* =========================================================
+ADMIN DELETE
+========================================================= */
+
+async function deletePost(id){
+
+if(
+!confirm(
+"Delete this post permanently?"
+)
+){
+return;
+}
+
+const response =
+await db
+.from("posts")
+.delete()
+.eq("id",id);
+
+if(response.error){
+
+alert(
+rpcErrorMessage(response.error)
+);
+
+return;
+}
+
+loadAdminPosts();
+
+}
+
+
+/* =========================================================
+ADMIN LOGOUT
+========================================================= */
+
+async function adminLogout(){
+
+await db.auth.signOut();
+
+document.getElementById(
+"adminDashboard"
+).style.display="none";
+
+document.getElementById(
+"adminLogin"
+).style.display="block";
+
+}
+
+
+/* =========================================================
+ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value){
+
+return String(value ?? "")
+.replace(
+/[&<>"']/g,
+char=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[char])
+);
+
+}
+
+
+/* =========================================================
+RESTORE SESSION
+========================================================= */
+
+if(
+currentUsername &&
+currentSession
+){
+
+document.getElementById(
+"currentUser"
+).textContent =
+"@" + currentUsername;
+
+document.getElementById(
+"myUser"
+).textContent =
+"@" + currentUsername;
+
+}
+
+
+/* =========================================================
+START
+========================================================= */
+
+showPage("home");
+
+</script>
+
+</body>
+</html>
